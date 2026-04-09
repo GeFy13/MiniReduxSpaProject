@@ -41,7 +41,7 @@ describe("Тесты карточных reducer'ов", () => {
         expect(state).not.toEqual(initialState);
         expect(selectors.getCardsCount(state)).toBe(1);
 
-        card = state.cards.find(card => card.id === deleteId);
+        const card = state.cards.find(card => card.id === deleteId);
         expect(card).toBeUndefined()
     });
 
@@ -62,7 +62,7 @@ describe("Тесты карточных reducer'ов", () => {
         expect(state).not.toEqual(initialState);
         expect(selectors.getCardsCount(state)).toBe(2);
 
-        card = state.cards.find(card => card.id === updateId);
+        const card = state.cards.find(card => card.id === updateId);
         const { id, ...info } = card;
         expect(info).toEqual(newCard)
     });
@@ -77,7 +77,7 @@ describe("Тесты карточных reducer'ов", () => {
         expect(state).toEqual(initialState);
         expect(selectors.getCardsCount(state)).toBe(2);
 
-        card = state.cards.find(card => card.id === updateId);
+        const card = state.cards.find(card => card.id === updateId);
         expect(card).toBeUndefined()
     });
 });
