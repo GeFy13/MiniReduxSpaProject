@@ -1,29 +1,85 @@
-import { setupCounter } from "./components/counter"
+import { HomeView } from './view/home.view'
+import { createStore, loadInitialState } from './store/store';
+import cardReducer from './store/reducers/cardReducer';
+import { Router } from './routes/routes';
+import { actions, ActionTypes, selectors } from './store/actionsAndSelectors';
+import { AddView } from './view/add.view';
 
-// Создание элементов через JavaScript
-const app = document.getElementById('root')
+document.addEventListener('DOMContentLoaded', () => {
+    let unsubscribe;
+    const store = createStore(cardReducer, loadInitialState());
 
-// Создаем заголовок
-const title = document.createElement('h1')
-title.textContent = 'Hello Vite + JavaScript!'
-title.style.color = '#333'
-title.style.fontFamily = 'Arial, sans-serif'
-title.style.display = "flex"
-title.style.justifyContent = "center"
-title.style.alignItems = 'center';
+    const router = new Router([
+        { path: '/', handler: showHomeView },
+        { path: '/add', handler: showAddView },
+        { path: '/edit/:id', handler: showEditView},
+        { path: '*', handler: () => router.navigate('/') }
+    ]);
 
-// Создаем кнопку
-const button = document.createElement('button')
-button.textContent = 'Нажми меня'
-button.style.padding = '10px 20px'
-button.style.backgroundColor = '#646cff'
-button.style.color = 'white'
-button.style.border = 'none'
-button.style.borderRadius = '5px'
-button.style.cursor = 'pointer'
+    store.subscribe(() => {
+        try {
+            const state = store.getState();
+            localStorage.setItem('cards_gallery_data', JSON.stringify(state))
+        } catch (error) {
+            throw new Error("Ошибка сохранения данных в LocalStorage:", error);
+        }
+    })
 
-// Добавляем все на страницу
-app.appendChild(title)
-app.appendChild(button)
+    function showHomeView() {
+        const data = JSON.parse(localStorage.getItem('cards_gallery_data'));
+        new HomeView(
+            document.getElementById('root'),
+            data,
+            () => router.navigate('/add'),
+            () => {   
+                if (data.cur_page < selectors.getPagesCount(data)) {
+                    store.dispatch(actions.nextPage());
+                }
+            },
+            () => {
+                if (data.cur_page > 1) {
+                    store.dispatch(actions.prevPage());
+                }
+            },
+            (id) => store.dispatch(actions.deleteCard(id)),
+            (card) => router.navigate(`/edit/${card.id}`)
+        )
 
-setupCounter(button)
+        if (unsubscribe) unsubscribe();
+        unsubscribe = store.subscribe(() => {
+            router.navigate('/');
+        })
+    }
+
+    function showAddView() {
+        new AddView(
+            document.getElementById('root'),
+            null,
+            (card) => store.dispatch(actions.addCard(card)),
+            () => router.navigate('/')
+        );
+        if (unsubscribe) unsubscribe();
+        unsubscribe = store.subscribe(() => {
+            router.navigate('/');
+        })
+    }
+
+    function showEditView(params) {
+        const id = parseInt(params.id);
+        const state = store.getState();
+        const card = selectors.getCardById(state, id);
+
+        new AddView(
+            document.getElementById('root'),
+            card,
+            (card) => store.dispatch(actions.updateCard(id, card)),
+            () => router.navigate('/')
+        );
+        if (unsubscribe) unsubscribe();
+        unsubscribe = store.subscribe(() => {
+            router.navigate('/');
+        })
+    }
+
+    router.handleRoute();
+})
