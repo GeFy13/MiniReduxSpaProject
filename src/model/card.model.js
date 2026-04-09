@@ -1,5 +1,6 @@
 import { createEditButton } from "../components/buttons/createEditButton";
 import { createRemoveButton } from "../components/buttons/createRemoveButton";
+import { selectors } from "../store/actionsAndSelectors";
 
 export class Card {
     constructor(data, onEdit, onDelete) {
@@ -14,7 +15,7 @@ export class Card {
 
     static createTestCard() {
         return {
-            id: Date.now(),
+            id: selectors.getCardsCount() + 1,
             title: 'Пример карты',
             description: 'Тестовое описание'
         }

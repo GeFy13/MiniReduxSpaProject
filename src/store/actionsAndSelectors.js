@@ -37,5 +37,5 @@ export const selectors = {
     getAllCards: (state) => state.cards,
     getCardById: (state, id) => state.cards.find(card => card.id === id),
     getCardsCount: (state) => state.cards.length,
-    getPagesCount: (state) => Math.ceil(state.cards.length / 7)
+    getPagesCount: (state) => Math.ceil(selectors.getCardsCount(state) / 7)
 };

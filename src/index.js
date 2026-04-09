@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const router = new Router([
         { path: '/', handler: showHomeView },
         { path: '/add', handler: showAddView },
-        { path: '/edit/:id', handler: showEditView},
+        { path: '/edit/:id', handler: showEditView},    
         { path: '*', handler: () => router.navigate('/') }
     ]);
 
@@ -31,16 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('root'),
             data,
             () => router.navigate('/add'),
-            () => {   
-                if (data.cur_page < selectors.getPagesCount(data)) {
-                    store.dispatch(actions.nextPage());
-                }
-            },
-            () => {
-                if (data.cur_page > 1) {
-                    store.dispatch(actions.prevPage());
-                }
-            },
+            () => store.dispatch(actions.nextPage()),
+            () => store.dispatch(actions.prevPage()),
             (id) => store.dispatch(actions.deleteCard(id)),
             (card) => router.navigate(`/edit/${card.id}`)
         )

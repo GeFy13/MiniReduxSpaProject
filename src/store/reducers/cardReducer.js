@@ -1,11 +1,11 @@
-import { ActionTypes } from "../actionsAndSelectors";
+import { ActionTypes, selectors } from "../actionsAndSelectors";
 
 const cardReducer = (state = [], action) => {
     switch (action.type) {
         case ActionTypes.ADD_CARD: {
             const newCard = {
                 ...action.payload,
-                id: Date.now()
+                id: selectors.getCardsCount(state) + 1
             }
             return {
                 ...state,
@@ -20,7 +20,7 @@ const cardReducer = (state = [], action) => {
             };
 
         case ActionTypes.UPDATE_CARD: {
-            const {id, updatedCard} = action.payload;
+            const { id, updatedCard } = action.payload;
             return {
                 ...state,
                 cards: state.cards.map(card =>
@@ -29,15 +29,23 @@ const cardReducer = (state = [], action) => {
             }
         }
         case ActionTypes.NEXT_PAGE:
-            return {
-                ...state,
-                cur_page: state.cur_page + 1
-            };
+
+            return state.cur_page < selectors.getPagesCount(state)
+                ?
+                {
+                    ...state,
+                    cur_page: state.cur_page + 1
+                }
+                : state;
+                
         case ActionTypes.PREV_PAGE:
-            return {
-                ...state,
-                cur_page: state.cur_page - 1
-            };
+            return state.cur_page > 1
+                ?
+                {
+                    ...state,
+                    cur_page: state.cur_page - 1
+                }
+                : state;
         default:
             return state
     }
